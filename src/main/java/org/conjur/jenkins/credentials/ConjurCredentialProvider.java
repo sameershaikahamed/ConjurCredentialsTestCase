@@ -34,47 +34,56 @@ import hudson.security.ACL;
 import jenkins.model.GlobalConfiguration;
 import jenkins.model.Jenkins;
 
+/**
+ * Provides the ConjurCredentails extends CredentialProvider *
+ */
 @Extension
 public class ConjurCredentialProvider extends CredentialsProvider {
 
-    private static final Logger LOGGER = Logger.getLogger(ConjurCredentialProvider.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(ConjurCredentialProvider.class.getName());
 
-    private static final ConcurrentHashMap<String, Supplier<Collection<StandardCredentials>>> allCredentialSuppliers = new ConcurrentHashMap<String, Supplier<Collection<StandardCredentials>>> ();
+	private static final ConcurrentHashMap<String, Supplier<Collection<StandardCredentials>>> allCredentialSuppliers = new ConcurrentHashMap<String, Supplier<Collection<StandardCredentials>>>();
 
-    private Supplier<Collection<StandardCredentials>> currentCredentialSupplier;
+	private Supplier<Collection<StandardCredentials>> currentCredentialSupplier;
 
+	/**
+	 * returns the Credentials as List based on the type,itemGroup and
+	 * authentication
+	 */
 
-    public <C extends Credentials> List<C> getCredentials(@Nonnull Class<C> type,
-                                                          @Nullable ItemGroup itemGroup,
-                                                          @Nullable Authentication authentication,
-                                                          @Nonnull List<DomainRequirement> domainRequirements) {
-        LOGGER.log(Level.FINE, "getCredentials (1)  type: " + type + " itemGroup: " + itemGroup);
-        return getCredentials(type, itemGroup, authentication);
-    }
-    
-    @Override
-    @Nonnull
-    public <C extends Credentials> List<C> getCredentials(@Nonnull Class<C> type,
-                                                          @Nonnull Item item,
-                                                          @Nonnull Authentication authentication,
-                                                          @Nonnull List<DomainRequirement> domainRequirements) {
-        LOGGER.log(Level.FINE, "getCredentials (2) type: " + type + " item: " + item);
-        return getCredentialsFromSupplier(type, item, authentication);
+	public <C extends Credentials> List<C> getCredentials(@Nonnull Class<C> type, @Nullable ItemGroup itemGroup,
+			@Nullable Authentication authentication, @Nonnull List<DomainRequirement> domainRequirements) {
+		LOGGER.log(Level.FINE, "getCredentials (1)  type: " + type + " itemGroup: " + itemGroup);
+		return getCredentials(type, itemGroup, authentication);
+	}
 
-    }
+	/**
+	 * returns the credentials from the supplier for the item,type and
+	 * authentication
+	 */
+	@Override
+	@Nonnull
+	public <C extends Credentials> List<C> getCredentials(@Nonnull Class<C> type, @Nonnull Item item,
+			@Nonnull Authentication authentication, @Nonnull List<DomainRequirement> domainRequirements) {
+		LOGGER.log(Level.FINE, "getCredentials (2) type: " + type + " item: " + item);
+		return getCredentialsFromSupplier(type, item, authentication);
 
-    @Override
-    @Nonnull
-    public <C extends Credentials> List<C> getCredentials(@Nonnull Class<C> type,
-                                                          ItemGroup itemGroup,
-                                                          Authentication authentication) {
-        LOGGER.log(Level.FINE, "getCredentials (3) type: " + type + " itemGroup: " + itemGroup);
-        return getCredentialsFromSupplier(type, itemGroup, authentication);
-    }
+	}
 
-    private <C extends Credentials> List<C> getCredentialsFromSupplier(@Nonnull Class<C> type,
-                                                                        ModelObject context,
-                                                                        Authentication authentication) {
+	/**
+	 * returns the Credentials as List based on the type,itemGroup and
+	 * authentication
+	 */
+	@Override
+	@Nonnull
+	public <C extends Credentials> List<C> getCredentials(@Nonnull Class<C> type, ItemGroup itemGroup,
+			Authentication authentication) {
+		LOGGER.log(Level.FINE, "getCredentials (3) type: " + type + " itemGroup: " + itemGroup);
+		return getCredentialsFromSupplier(type, itemGroup, authentication);
+	}
+
+	private <C extends Credentials> List<C> getCredentialsFromSupplier(@Nonnull Class<C> type, ModelObject context,
+			Authentication authentication) {
 
 		LOGGER.log(Level.FINE, "Type: " + type.getName() + " authentication: " + authentication + " context: "
 				+ context.getDisplayName());
@@ -94,8 +103,6 @@ public class ConjurCredentialProvider extends CredentialsProvider {
 				LOGGER.log(Level.FINE, "To Fetch credentials");
 
 				getStore(context);
-				// getStore((ModelObject) ((Run)context).getParent());
-
 				if (currentCredentialSupplier != null) {
 					LOGGER.log(Level.FINE, "Iniside current credentialsupplier>>>>" + currentCredentialSupplier);
 					allCredentials = currentCredentialSupplier.get();
@@ -108,10 +115,8 @@ public class ConjurCredentialProvider extends CredentialsProvider {
 							LOGGER.log(Level.FINE, "Type is" + type);
 						}
 					}
-					return allCredentials.stream().filter(c -> type.isAssignableFrom(c.getClass()))
-							// cast to keep generics happy even though we are assignable
-
-							.map(type::cast).collect(Collectors.toList());
+					return allCredentials.stream().filter(c -> type.isAssignableFrom(c.getClass())).map(type::cast)
+							.collect(Collectors.toList());
 				}
 
 			} else {
@@ -141,6 +146,9 @@ public class ConjurCredentialProvider extends CredentialsProvider {
 		return Collections.emptyList();
 	}
 
+	/**
+	 * @return the ConjurCredentailStore based on the ModelObject
+	 */
 	@Override
 	public ConjurCredentialStore getStore(ModelObject object) {
 
@@ -162,7 +170,6 @@ public class ConjurCredentialProvider extends CredentialsProvider {
 		}
 
 		if (object != null) {
-			//LOGGER.log(Level.FINE, "Object not null" + object);
 
 			String key = String.valueOf(object.hashCode());
 			LOGGER.log(Level.FINE, "Object Key not null" + object.getDisplayName() + "Key" + key);
@@ -172,12 +179,10 @@ public class ConjurCredentialProvider extends CredentialsProvider {
 					LOGGER.log(Level.FINEST, "GetStore EXISTING ConjurCredentialProvider : "
 							+ object.getClass().getName() + ": " + object.toString() + " => " + object.hashCode());
 					store = ConjurCredentialStore.getAllStores().get(key);
-
-
 					LOGGER.log(Level.FINEST, "All Store detaials" + store);
 
 				} else {
-					
+
 					store = new ConjurCredentialStore(this, object);
 					supplier = memoizeWithExpiration(CredentialsSupplier.standard(object), Duration.ofSeconds(120));
 					ConjurCredentialStore.getAllStores().put(key, store);
@@ -187,9 +192,6 @@ public class ConjurCredentialProvider extends CredentialsProvider {
 
 				currentCredentialSupplier = allCredentialSuppliers.get(key);
 
-				//LOGGER.log(Level.FINE, "currentCredentialSupplier final" + currentCredentialSupplier.get());
-				//LOGGER.log(Level.FINE, "Store details>>>" + store.getContextDisplayName());
-
 			} catch (Exception ex) {
 				LOGGER.log(Level.FINE, ex.getMessage());
 			}
@@ -198,15 +200,31 @@ public class ConjurCredentialProvider extends CredentialsProvider {
 		return store;
 	}
 
+	/**
+	 * 
+	 * @return Map containing all credential suppliers
+	 */
+
 	public static ConcurrentHashMap<String, Supplier<Collection<StandardCredentials>>> getAllCredentialSuppliers() {
 		return allCredentialSuppliers;
 	}
 
+	/**
+	 * @return iconClassName
+	 */
 	@Override
 	public String getIconClassName() {
 		return "icon-conjur-credentials-store";
 	}
 
+	/**
+	 * check for the expiration for Supplier based on duration to refresh
+	 * 
+	 * @param <T>
+	 * @param base
+	 * @param duration
+	 * @return
+	 */
 	public static <T> Supplier<T> memoizeWithExpiration(Supplier<T> base, Duration duration) {
 		return CustomSuppliers.memoizeWithExpiration(base, duration);
 	}
