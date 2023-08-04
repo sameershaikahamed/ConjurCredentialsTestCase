@@ -1,3 +1,4 @@
+
 package org.conjur.jenkins.credentials;
 
 import static org.junit.Assert.assertFalse;
@@ -14,18 +15,18 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 @RunWith(PowerMockRunner.class)
+
 @PrepareForTest({ ConjurCredentialProvider.class })
 public class ConjurCredentialProviderTest {
-	
+
 	@Mock
 	public ConjurCredentialProvider provider;
-
 
 	@Test
 	public void getStoreTest() {
 		ConjurCredentialStore store = null;
-		 when(provider.getStore(any())).thenReturn(store);
-		 assertFalse(provider.getStore(any()) instanceof ConjurCredentialStore);
+		when(provider.getStore(any())).thenReturn(store);
+		assertFalse(provider.getStore(any()) instanceof ConjurCredentialStore);
 	}
 
 	@Test(expected = RuntimeException.class)

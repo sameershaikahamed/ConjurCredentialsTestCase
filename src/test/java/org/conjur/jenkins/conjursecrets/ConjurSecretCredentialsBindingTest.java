@@ -1,3 +1,4 @@
+
 package org.conjur.jenkins.conjursecrets;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -18,6 +19,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import com.cloudbees.plugins.credentials.CredentialsStore;
 
 @RunWith(PowerMockRunner.class)
+
 @PrepareForTest({ ConjurSecretCredentialsBinding.class })
 public class ConjurSecretCredentialsBindingTest {
 
@@ -26,11 +28,10 @@ public class ConjurSecretCredentialsBindingTest {
 	@Mock
 	public ConjurSecretCredentialsBinding binding;
 
-
 	@Test
 	public void testBind() throws IOException, InterruptedException {
 
-		Map<String, String> secretVals=new HashMap<>();
+		Map<String, String> secretVals = new HashMap<>();
 		MultiEnvironment env = new MultiEnvironment(secretVals);
 		when(binding.bind(any(), any(), any(), any())).thenReturn(env);
 		assertTrue(binding.bind(any(), any(), any(), any()) instanceof MultiEnvironment);

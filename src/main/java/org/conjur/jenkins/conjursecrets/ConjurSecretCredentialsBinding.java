@@ -115,7 +115,7 @@ public class ConjurSecretCredentialsBinding extends MultiBinding<ConjurSecretCre
 				Collections.singletonMap(variable, conjurSecretCredential.getSecret().getPlainText()));
 	}
 
-	private final @Nonnull <C> C getCredentialsFor(@Nonnull Run<?, ?> build) throws IOException {
+	private final @Nonnull <C> C getCredentialsFor(@Nonnull Run<?, ?> build) throws IOException ,InterruptedException{
 
 		IdCredentials cred = CredentialsProvider.findCredentialById(credentialsId, IdCredentials.class, build);
 		LOGGER.log(Level.FINE, "Calling getCredential For1" + build.getFullDisplayName());
@@ -133,10 +133,16 @@ public class ConjurSecretCredentialsBinding extends MultiBinding<ConjurSecretCre
 				LOGGER.log(Level.FINE, "CredentialId after removing ${}" + newCredentialId);
 
 				ConjurSecretCredentials conjurSecretCredential = null;
-				conjurSecretCredential = ConjurSecretCredentials.credentialWithID(newCredentialId, build);
+				
+				conjurSecretCredential = ConjurSecretCredentials.credentialWithID(newCredentialId, item);
 				LOGGER.log(Level.FINE, "From Binding Credential" + conjurSecretCredential);
 
 				cred = conjurSecretCredential;
+				if(cred==null)
+				{
+					throw new CredentialNotFoundException("Could not find credentials entry with ID '" + credentialsId + "'");
+				}
+				
 
 			}
 		}
@@ -148,7 +154,7 @@ public class ConjurSecretCredentialsBinding extends MultiBinding<ConjurSecretCre
 
 		Descriptor<?> expected = Jenkins.getActiveInstance().getDescriptor(type());
 		throw new CredentialNotFoundException(
-				"Credentials '" + credentialsId + "' is of type '" + cred + "' where '"
+				"Credentials '" + credentialsId + "' not found '" + cred + "' where '"
 						+ (expected != null ? expected.getDisplayName() : type().getName()) + "' was expected");
 
 	}

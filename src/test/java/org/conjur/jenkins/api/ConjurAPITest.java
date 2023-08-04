@@ -1,3 +1,4 @@
+
 package org.conjur.jenkins.api;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -28,11 +29,12 @@ import okhttp3.Call;
 import okhttp3.OkHttpClient;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ ConjurAPI.class, JwtToken.class , ConjurAPIUtils.class})
+
+@PrepareForTest({ ConjurAPI.class, JwtToken.class, ConjurAPIUtils.class })
+
 @PowerMockIgnore({ "javax.management.", "com.sun.org.apache.xerces.", "javax.xml.", "org.xml.", "org.w3c.dom.*",
 		"org.apache.http.conn.ssl.*", "javax.net.ssl.*", "com.sun.org.apache.xalan.", "javax.activation.*",
-		 "javax.xml.*", "org.xml.*", "javax.management.*","java.util.logging.*",
-		"javax.crypto.*" })
+		"javax.xml.*", "org.xml.*", "javax.management.*", "java.util.logging.*", "javax.crypto.*" })
 
 public class ConjurAPITest {
 
@@ -42,8 +44,6 @@ public class ConjurAPITest {
 	public Call remoteCall;
 	public ConjurAPI api;
 	public List<UsernamePasswordCredentials> availableCredential;
-	
-	
 
 	@Before
 	public void setUp() throws IOException {
@@ -67,24 +67,21 @@ public class ConjurAPITest {
 	@Test
 	public void checkAuthentication() throws IOException {
 
-
 		PowerMockito.mockStatic(JwtToken.class);
 		when(JwtToken.getToken(context)).thenReturn(
 				"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c");
 		when(ConjurAPI.getAuthorizationToken(client, conjurConfiguration, context)).thenReturn("success");
-		assertEquals("success",ConjurAPI.getAuthorizationToken(client, conjurConfiguration, context));
+		assertEquals("success", ConjurAPI.getAuthorizationToken(client, conjurConfiguration, context));
 
 	}
 
 	@Test
 	public void checkSecretVal() throws IOException {
-		
+
 		when(ConjurAPI.getSecret(client, conjurConfiguration, "auth-token", "host/frontend/frontend-01"))
 				.thenReturn("bhfbdbkfbkd-bvjdbfbjbv-bfjbdbjkb-bbfkbskb");
 		assertEquals(ConjurAPI.getSecret(client, conjurConfiguration, "auth-token", "host/frontend/frontend-01"),
 				"bhfbdbkfbkd-bvjdbfbjbv-bfjbdbjkb-bbfkbskb");
 	}
-
-
 
 }
