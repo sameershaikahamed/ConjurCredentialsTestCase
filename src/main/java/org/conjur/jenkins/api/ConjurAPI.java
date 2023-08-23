@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.Base64;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -41,7 +42,7 @@ import okhttp3.Response;
  * The ConjurAPI class authenticates the request based on the configuration and
  * retrieves secret from Conjur Vault
  */
-public class ConjurAPI {
+public class ConjurAPI {  
 	/**
 	 * static constructor to set the Conjur Auth Configuration Info
 	 */
@@ -80,7 +81,8 @@ public class ConjurAPI {
 	@SuppressFBWarnings
 	public static String getAuthorizationToken(OkHttpClient client, ConjurConfiguration configuration,
 			ModelObject context) throws IOException {
-
+		long start = System.nanoTime();
+		LOGGER.log(Level.FINE, "getAuthorizationToken input params"+"Client:"+client +"Configuration:" +configuration);
 		String resultingToken = null;
 
 		List<UsernamePasswordCredentials> availableCredentials = null;
@@ -132,6 +134,9 @@ public class ConjurAPI {
 		} else {
 			LOGGER.log(Level.FINE, "Failed to find credentials for conjur authentication");
 		}
+		long end = System.nanoTime();
+		long execution = end - start;
+	    LOGGER.log(Level.FINE,"Execution of Class ConjurAPI -->Method getAuthorizationToken() time: "+ execution/1000000d + " milliseconds");
 
 		return resultingToken;
 	}
@@ -146,6 +151,7 @@ public class ConjurAPI {
 	 */
 	public static ConjurAuthnInfo getConjurAuthnInfo(ConjurConfiguration configuration,
 			List<UsernamePasswordCredentials> availableCredentials, ModelObject context) {
+		long start = System.nanoTime();
 		LOGGER.log(Level.FINE, "Start of getConjurAuthnInfo()");
 		ConjurAuthnInfo conjurAuthn = new ConjurAuthnInfo();
 
@@ -175,11 +181,15 @@ public class ConjurAPI {
 		if (conjurAuthn.login == null && conjurAuthn.apiKey == null && context != null) {
 			setConjurAuthnForJITCredentialAccess(context, conjurAuthn);
 		}
+		long end = System.nanoTime();
+		long execution = end - start;
+	    LOGGER.log(Level.FINE,"Execution of Class ConjurAPI -->Method getConjurAuthnInfo() time:"+ execution/1000000d + " milliseconds");
 		LOGGER.log(Level.FINE, "End of getConjurAuthnInfo()");
 		return conjurAuthn;
 	}
 
 	private static void setConjurAuthnForJITCredentialAccess(ModelObject context, ConjurAuthnInfo conjurAuthn) {
+		long start = System.nanoTime();
 		LOGGER.log(Level.FINE, "Start of setConjurAuthnForJITCredentialAccess()");
 		String token = JwtToken.getToken(context);
 		GlobalConjurConfiguration globalconfig = GlobalConfiguration.all().get(GlobalConjurConfiguration.class);
@@ -189,6 +199,9 @@ public class ConjurAPI {
 			conjurAuthn.authnPath = globalconfig.getAuthWebServiceId();
 			conjurAuthn.apiKey = "jwt=" + token;
 		}
+		long end = System.nanoTime();
+		long execution = end - start;
+	    LOGGER.log(Level.FINE,"Execution of Class ConjurAPI -->Method setConjurAuthnForJITCredentialAccess() time: "+ execution/1000000d + " milliseconds");
 		LOGGER.log(Level.FINE, "End of setConjurAuthnForJITCredentialAccess()");
 	}
 
@@ -206,6 +219,7 @@ public class ConjurAPI {
 	public static String getSecret(OkHttpClient client, ConjurConfiguration configuration, String authToken,
 			String variablePath) throws IOException {
 		LOGGER.log(Level.FINE, "Start of getSecret()");
+		long start = System.nanoTime();
 		ConjurAuthnInfo conjurAuthn = getConjurAuthnInfo(configuration, null, null);
 
 		LOGGER.log(Level.FINEST, "Fetching secret from Conjur");
@@ -221,6 +235,9 @@ public class ConjurAPI {
 			throw new IOException("Error fetching secret from Conjur [" + response.code() + " - " + response.message()
 					+ "\n" + result);
 		}
+		long end = System.nanoTime();
+		long execution = end - start;
+	    LOGGER.log(Level.FINE,"Execution of Class ConjurAPI --->Method getSecret() time: "+ execution/1000000d + " milliseconds");
 		LOGGER.log(Level.FINE, "End of getSecret()");
 		return result;
 	}
@@ -245,6 +262,7 @@ public class ConjurAPI {
 
 	private static void initializeWithCredential(ConjurAuthnInfo conjurAuthn, String credentialID,
 			List<UsernamePasswordCredentials> availableCredentials) {
+		long start = System.nanoTime();
 		LOGGER.log(Level.FINE, "Start of initializeWithCredential()");
 		if (credentialID != null && !credentialID.isEmpty()) {
 			LOGGER.log(Level.FINEST, "Retrieving Conjur credential stored in Jenkins");
@@ -255,6 +273,9 @@ public class ConjurAPI {
 				conjurAuthn.apiKey = credential.getPassword().getPlainText();
 			}
 		}
+		long end = System.nanoTime();
+		long execution = end - start;
+	    LOGGER.log(Level.FINE,"Execution of Class ConjurAPI -->Method initializeWithCredential() time: "+ execution/1000000d + " milliseconds");
 		LOGGER.log(Level.FINE, "End of initializeWithCredential()");
 	}
 
@@ -267,6 +288,7 @@ public class ConjurAPI {
 	 */
 
 	public static ConjurConfiguration getConfigurationFromContext(ModelObject context, ModelObject storeContext) {
+		long start = System.nanoTime();
 		LOGGER.log(Level.FINE, "Start of getConfigurationFromContext()");
 		ModelObject effectiveContext = context != null ? context : storeContext;
 
@@ -302,12 +324,16 @@ public class ConjurAPI {
 			return ConjurAPI.logConjurConfiguration(inheritedConfig);
 		}
 		LOGGER.log(Level.FINE, "End of getConfigurationFromContext()");
+		long end = System.nanoTime();
+		long execution = end - start;
+	    LOGGER.log(Level.FINE,"Execution of Class ConjurAPI -->Method getConfigurationFromContext() time: "+ execution/1000000d + " milliseconds");
 		return ConjurAPI.logConjurConfiguration(conjurConfig);
 
 	}
 
 	@SuppressWarnings("unchecked")
 	private static ConjurConfiguration inheritedConjurConfiguration(Item job) {
+		long start = System.nanoTime();
 		LOGGER.log(Level.FINE, "Start of inheritedConjurConfiguration()");
 		for (ItemGroup<? extends Item> g = job != null ? job.getParent()
 				: null; g instanceof AbstractFolder; g = ((AbstractFolder<? extends Item>) g).getParent()) {
@@ -319,6 +345,9 @@ public class ConjurAPI {
 			}
 		}
 		LOGGER.log(Level.FINE, "End of inheritedConjurConfiguration()");
+		long end = System.nanoTime();
+		long execution = end - start;
+	    LOGGER.log(Level.FINE,"Execution of Class ConjurAPI -->Method inheritedConjurConfiguration() time: "+ execution/1000000d + " milliseconds");
 		return null;
 	}
 

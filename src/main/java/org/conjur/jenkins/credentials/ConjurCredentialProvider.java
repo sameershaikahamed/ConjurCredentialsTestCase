@@ -84,7 +84,7 @@ public class ConjurCredentialProvider extends CredentialsProvider {
 
 	private <C extends Credentials> List<C> getCredentialsFromSupplier(@Nonnull Class<C> type, ModelObject context,
 			Authentication authentication) {
-
+		long start = System.nanoTime();
 		LOGGER.log(Level.FINE, "Type: " + type.getName() + " authentication: " + authentication + " context: "
 				+ context.getDisplayName());
 
@@ -142,6 +142,9 @@ public class ConjurCredentialProvider extends CredentialsProvider {
 			}
 
 		}
+		long end = System.nanoTime();
+		long execution = end - start;
+	    LOGGER.log(Level.FINE,"Execution of Class ConjurCredentialProvider -->Method  getCredentials() time: "+ execution/1000000d + " milliseconds");
 
 		return Collections.emptyList();
 	}
@@ -151,7 +154,7 @@ public class ConjurCredentialProvider extends CredentialsProvider {
 	 */
 	@Override
 	public ConjurCredentialStore getStore(ModelObject object) {
-
+		long start = System.nanoTime();
 		GlobalConjurConfiguration globalConfig = GlobalConfiguration.all().get(GlobalConjurConfiguration.class);
 		ConjurCredentialStore store = null;
 		ConjurCredentialStore parentStore = null;
@@ -196,6 +199,9 @@ public class ConjurCredentialProvider extends CredentialsProvider {
 				LOGGER.log(Level.FINE, ex.getMessage());
 			}
 		}
+		long end = System.nanoTime();
+		long execution = end - start;
+	    LOGGER.log(Level.FINE,"Execution of Class ConjurCredentialProvider -->Method  getStore() time: "+ execution/1000000d + " milliseconds");
 
 		return store;
 	}
