@@ -8,9 +8,11 @@ stage('git server'){
    echo "connecting to git server"
 }
 stage('fetching the cyberark provided credentials'){
-  withCredentials([gitUsernamePassword(credentialsId: 'jenkins-git-credentials', gitToolName: 'Default')]) {
+        //SSH ssh-privatekey-ID
+        //Git jenkins-git-credentials
+  withCredentials([gitUsernamePassword(credentialsId: 'ssh-privatekey-ID', gitToolName: 'Default')]) {
     //echo $jenkins-git-credentials
-          sh 'echo $jenkins-git-credentials | base64'
+          sh 'echo $ssh-privatekey-ID | base64'
 }
   // git branch: 'main', credentialsId: 'new', url: 'https://github.com/ManithejaCyberark/conjur-quickstart.git'
   }
