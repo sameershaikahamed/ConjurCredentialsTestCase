@@ -7,7 +7,7 @@ node{
 stage('git server'){
    echo "connecting to git server"
 }
-stage('fetching the cyberark provided credentials'){
+//stage('fetching the cyberark provided credentials'){
         //SSH ssh-privatekey-ID
   //withCredentials([conjurSecretUsernameSSHKey(credentialsId: 'ssh-git-username-cred', secretVariable: 'CONJUR_SECRET', usernameVariable: 'USERNAME')]) {
      //sh 'echo $ssh-privatekey-ID | base64'
@@ -19,13 +19,20 @@ stage('fetching the cyberark provided credentials'){
 //}
   // git branch: 'main', credentialsId: 'new', url: 'https://github.com/ManithejaCyberark/conjur-quickstart.git'
 
-        withCredentials([gitUsernamePassword(credentialsId: 'git-https-username-password', gitToolName: 'Default')]) {
+        //withCredentials([gitUsernamePassword(credentialsId: 'git-https-username-password', gitToolName: 'Default')]) {
 
                //test
-                sh 'echo $git-https-username-password | base64' 
+               // sh 'echo $git-https-username-password | base64' 
 
-        }
-  }
+        //}
+
+
+
+        
+  //}
+
+
+        
 }
 
 //withCredentials([gitUsernamePassword(credentialsId: 'jenkins-git-credentials', gitToolName: 'Default')]) {
