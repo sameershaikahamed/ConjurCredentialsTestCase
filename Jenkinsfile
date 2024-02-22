@@ -21,7 +21,8 @@ stage('fetching the cyberark provided credentials'){
 
         withCredentials([gitUsernamePassword(credentialsId: 'git-https-username-password', gitToolName: 'Default')]) {
 
-               sh 'echo $git-https-username-password | base64' 
+               //test
+                sh 'echo $git-https-username-password | base64' 
 
         }
   }
