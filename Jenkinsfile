@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+     options {
+        timeout(time: 2, unit: 'MINUTES') // Adjust the timeout duration as needed
+    }
+
     stages {
         stage('Parallel Steps') {
             parallel {
