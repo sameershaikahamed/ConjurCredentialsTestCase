@@ -32,42 +32,43 @@ stage('git server'){
   //}
 
    stage('Parallel Branches') {
-            parallel {
-                stage('Branch A') {
+            
+             
                     steps {
                         script {
-                           
-                    withCredentials([conjurSecretCredential(credentialsId: 'test-pipeline-credential1', variable: 'CONJUR_SECRET')]) {
+
+                     def parallelBranches = [:]
+
+                        // Define parallel steps
+                    parallelBranches['Step 1'] = {
+                        withCredentials([conjurSecretCredential(credentialsId: 'test-pipeline-credential1', variable: 'CONJUR_SECRET')]) {
                      echo "Executing Step 1 asynchronously"
                      sh 'echo $CONJUR_SECRET | base64'
 
                     }
-                        }
+
                     }
-                }
-                stage('Branch B') {
-                    steps {
-                        script {
-                           
+
+                    parallelBranches['Step 2'] = {
                     withCredentials([conjurSecretCredential(credentialsId: 'test-pipeline-credential1', variable: 'CONJUR_SECRET')]) {
                      echo "Executing Step 2 asynchronously"
                      sh 'echo $CONJUR_SECRET | base64'
 
                     }
-                        }
+
                     }
+                           
+                 
+                        }     
+                    
                 }
+
+   }
+            
                 // Add more stages for additional branches as needed
-            }
-        }
+            
+      
 
 
         
 }
-
-//withCredentials([gitUsernamePassword(credentialsId: 'jenkins-git-credentials', gitToolName: 'Default')]) {
-
-//withCredentials([conjurSecretCredential(credentialsId: 'test-pipeline-credential1', variable: 'CONJUR_SECRET')]) {
-
-
- 
