@@ -5,8 +5,8 @@ pipeline {
         stage('Parallel Branches') {
             parallel {
                 stage('Branch A') {
-                    when {
-                        branch 'main'
+                         agent {
+                        label 'linux'
                     }
                     steps {
                         withCredentials([conjurSecretCredential(credentialsId: 'test-pipeline-credential1', variable: 'CONJUR_SECRET')]) {
@@ -17,8 +17,8 @@ pipeline {
                     }
                 }
                 stage('Branch B') {
-                    when {
-                        branch 'dev-branch'
+                     agent {
+                        label 'windows'
                     }
                     steps {
                           withCredentials([conjurSecretCredential(credentialsId: 'test-pipeline-credential1', variable: 'CONJUR_SECRET')]) {
