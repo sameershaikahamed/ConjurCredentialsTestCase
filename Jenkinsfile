@@ -5,9 +5,7 @@ pipeline {
         stage('Parallel Branches') {
             parallel {
                 stage('Branch A') {
-                         agent {
-                        label 'linux'
-                    }
+                 
                     steps {
                         withCredentials([conjurSecretCredential(credentialsId: 'test-pipeline-credential1', variable: 'CONJUR_SECRET')]) {
                                 // Execute asynchronous task for Step 1
@@ -17,9 +15,7 @@ pipeline {
                     }
                 }
                 stage('Branch B') {
-                     agent {
-                        label 'windows'
-                    }
+                   
                     steps {
                           withCredentials([conjurSecretCredential(credentialsId: 'test-pipeline-credential1', variable: 'CONJUR_SECRET')]) {
                                 // Execute asynchronous task for Step 1
