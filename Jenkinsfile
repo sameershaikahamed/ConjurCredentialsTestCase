@@ -1,9 +1,7 @@
 pipeline {
     agent any
 
-     triggers {
-        cron('H/1 * * * *') // Trigger build every minute
-    }
+   
     stages {
         stage('Parallel Branches') {
             parallel {
