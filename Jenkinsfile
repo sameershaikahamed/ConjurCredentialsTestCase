@@ -4,8 +4,8 @@ pipeline {
     stages {
         stage('conjur-credentials Main Branch') {
             steps {
-                withCredentials([conjurSecretCredential(credentialsId: 'test-pipeline-credential1', variable: 'CONJUR_SECRET')]) {
-               sh ' echo $CONJUR_SECRET | base64'
+               withCredentials([gitUsernamePassword(credentialsId: 'jenkins-username-password-cred', gitToolName: 'Default')]) {
+               sh ' echo $jenkins-username-password-cred | base64'
                 
                 }
             }
