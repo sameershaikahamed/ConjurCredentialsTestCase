@@ -1,6 +1,11 @@
 pipeline {
     agent any
 
+    triggers {
+        // Use PeriodicFolderTrigger to trigger the pipeline every minute
+        periodicFolderTrigger('* * * * *')
+    }
+
     stages {
         stage('conjur-credentials Main Branch') {
             steps {
