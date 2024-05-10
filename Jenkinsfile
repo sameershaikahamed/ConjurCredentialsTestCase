@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     triggers {
-        // Use PeriodicFolderTrigger to trigger the pipeline every minute
-        periodicFolderTrigger('* * * * *')
+        // Use to trigger the pipeline every minute
+        pollSCM('* * * * *')
     }
 
     stages {
