@@ -4,6 +4,7 @@ pipeline {
     //triggers {
         // Use to trigger the pipeline every minute
       //  pollSCM('* * * * *')
+    //
    // }
 
     stages {
