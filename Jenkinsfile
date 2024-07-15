@@ -1,4 +1,4 @@
-/*pipeline {
+pipeline {
     agent any
 
     //triggers {
@@ -20,10 +20,10 @@
             }
         }
     }
-}*/
+}
 
 
-pipeline {
+/*pipeline {
     agent any
 
     stages {
@@ -36,6 +36,6 @@ pipeline {
         }
  
     }
-}
+}*/
 
 
