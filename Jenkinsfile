@@ -1,4 +1,4 @@
-pipeline {
+/*pipeline {
     agent any
 
     //triggers {
@@ -21,4 +21,4 @@ pipeline {
             }
         }
     }
-}
+}*/
