@@ -23,19 +23,6 @@ pipeline {
 }
 
 
-/*pipeline {
-    agent any
 
-    stages {
-        stage('Checkout') {
-            steps {
-                // Checkout code
-                checkout([$class: 'GitSCM', branches: [[name: '*/main']],
-                          userRemoteConfigs: [[url: 'https://github.com/sameershaikahamed/ConjurCredentialsTestCase.git', credentialsId: 'folder1-username-pwd-dummy-cred']]])
-            }
-        }
- 
-    }
-}*/
 
 
