@@ -9,7 +9,6 @@ pipeline {
     stages {
         stage('Folder Multi Branch Git Username & Password Credentials') {
             steps {
-               // withCredentials([conjurSecretCredential(credentialsId: 'multi-folder-multi-branch-username-pwd-credentials', variable: 'CONJUR_SECRET')]) {
                     withCredentials([gitUsernamePassword(credentialsId: 'multi-folder-multi-branch-username-pwd-credentials', gitToolName: 'Default')]) {
                     sh 'echo $multi-folder-multi-branch-username-pwd-credentials | base64'
                 }
