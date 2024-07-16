@@ -28,7 +28,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git url: 'github.com/sameershaikahamed/ConjurCredentialsTestCase.git',
+                git url: 'https://github.com/sameershaikahamed/ConjurCredentialsTestCase.git',
                     credentialsId: 'multi-folder-multi-branch-username-pwd-credentials'
             }
         }
