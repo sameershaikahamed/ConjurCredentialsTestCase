@@ -26,7 +26,7 @@ pipeline {
                     credentialsId: 'multi-folder-multi-branch-username-pwd-credentials'
                 
                 }
-            }
+            
         }
     }
 }
