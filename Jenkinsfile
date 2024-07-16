@@ -1,10 +1,10 @@
-/*pipeline {
+pipeline {
     agent any
 
-   triggers {
+    //triggers {
         // Use to trigger the pipeline every minute
-        pollSCM('* * * * *')
-    }
+      //  pollSCM('* * * * *')
+   // }
 
     stages {
         stage('conjur-credentials Main Branch') {
@@ -20,23 +20,4 @@
             }
         }
     }
-}*/
-
-
-pipeline {
-    agent any
-    stages {
-        stage('Checkout') {
-            steps {
-                git url: 'https://github.com/sameershaikahamed/ConjurCredentialsTestCase.git',
-                    credentialsId: 'multi-folder-multi-branch-username-pwd-credentials'
-            }
-        }
-   
-    }
 }
-
-
-
-
-
