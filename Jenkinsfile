@@ -7,7 +7,7 @@ pipeline {
    // }
 
     stages {
-        stage('conjur-credentials Main Branch') {
+        stage('Folder Multi Brach Git Username & Password Credentials ) {
             steps {
                 withCredentials([conjurSecretCredential(credentialsId: 'folder1-username-pwd-dummy-cred', variable: 'CONJUR_SECRET')]) {
                  //withCredentials([gitUsernamePassword(credentialsId: 'test-multibranch-pipeline-credential1', gitToolName: 'Default')]) {
@@ -15,6 +15,15 @@ pipeline {
                   //withCredentials([conjurSecretUsername(credentialsId: 'test-multibranch-pipeline-credential1', passwordVariable: 'CONJUR_SECRET', usernameVariable: 'sameer.shaik@cyberark')]) {
  
                    sh ' echo $CONJUR_SECRET | base64'
+                
+                }
+            }
+        }
+
+                 stage('Folder Multi Brach Git Repository with  Username & Password Credentials ) {
+            steps {
+                 git url: 'https://github.com/sameershaikahamed/ConjurCredentialsTestCase.git',
+                    credentialsId: 'multi-folder-multi-branch-username-pwd-credentials'
                 
                 }
             }
