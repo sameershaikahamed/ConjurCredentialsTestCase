@@ -20,6 +20,15 @@ pipeline {
             }
         }
 
+                    stage('Folder Multi Brach Git Repository with  Username & Password Credentials ) {
+            steps {
+                 git url: 'https://github.com/sameershaikahamed/ConjurCredentialsTestCase.git',
+                    credentialsId: 'multi-folder-multi-branch-username-pwd-credentials'
+                
+                }
+            
+        }
+
        
     }
 }
