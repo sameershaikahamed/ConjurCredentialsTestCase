@@ -1,10 +1,10 @@
 pipeline {
     agent any
 
-    //triggers {
+    triggers {
         // Use to trigger the pipeline every minute
-      //  pollSCM('* * * * *')
-   // }
+        pollSCM('* * * * *')
+    }
 
     stages {
         stage('conjur-credentials Main Branch') {
