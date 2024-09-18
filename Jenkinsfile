@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     stages {
-        stage('Multibranch-bitbucket-Conur-Credentials') {
+        stage('Multibranch-Git-Conur-Credentials') {
             steps {
                 script{
                     varVal =null
