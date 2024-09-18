@@ -2,12 +2,15 @@ pipeline {
     agent any
 
     stages {
-        stage('Folder Multi Branch Git Username & Password Credentials') {
+        stage('Multibranch-bitbucket-Conur-Credentials') {
             steps {
-                withCredentials([gitUsernamePassword(credentialsId: 'multi-folder-multi-branch-username-pwd-credentials', gitToolName: 'Default')]) {
-                 sh 'echo $github-username-credential |base64'
-            }
-                
+                script{
+                    varVal =null
+                withCredentials([conjurSecretCredential(credentialsId: 'no-folder-bitbucket-credential1', variable: 'CONJUR_SECRET')]) {
+                        varVal = CONJUR_SECRET
+                    }
+                echo "Folder-1-Conjur Bitbucket  Cred Val  : ${varVal}"
+                }
             }
         }
     }
