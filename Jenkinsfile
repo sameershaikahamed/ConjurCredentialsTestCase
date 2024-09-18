@@ -1,30 +1,15 @@
 pipeline {
     agent any
 
-    //triggers {
-        // Use to trigger the pipeline every minute
-      //  pollSCM('* * * * *')
-   // }
-
     stages {
-        stage('Folder Multi Brach Git Username & Password Credentials ) {
+        stage('Multibranch-bitbucket-Conur-Credentials') {
             steps {
-                withCredentials([conjurSecretCredential(credentialsId: 'folder1-username-pwd-dummy-cred', variable: 'CONJUR_SECRET')]) {
-                 //withCredentials([gitUsernamePassword(credentialsId: 'test-multibranch-pipeline-credential1', gitToolName: 'Default')]) {
-                   //withCredentials([conjurSecretCredential(credentialsId: 'test-multibranch-pipeline-credential1', variable: 'CONJUR_SECRET')]) {
-                  //withCredentials([conjurSecretUsername(credentialsId: 'test-multibranch-pipeline-credential1', passwordVariable: 'CONJUR_SECRET', usernameVariable: 'sameer.shaik@cyberark')]) {
- 
-                   sh ' echo $CONJUR_SECRET | base64'
-                
-                }
-            }
-        }
-
-                 stage('Folder Multi Brach Git Repository with  Username & Password Credentials ) {
-            steps {
-                 git url: 'https://github.com/sameershaikahamed/ConjurCredentialsTestCase.git',
-                    credentialsId: 'multi-folder-multi-branch-username-pwd-credentials'
-                
+                script{
+                    varVal =null
+                withCredentials([conjurSecretCredential(credentialsId: 'no-folder-bitbucket-credential1', variable: 'CONJUR_SECRET')]) {
+                        varVal = CONJUR_SECRET
+                    }
+                echo "Folder-1-Conjur Bitbucket  Cred Val  : ${varVal}"
                 }
             }
         }
