@@ -30,7 +30,7 @@ pipeline {
             steps {
                 script{
                     varVal =null
-                withCredentials([usernamePassword(credentialsId: 'folder-level-username-pwd-ID', passwordVariable: 'pwd', usernameVariable: 'username')]) {
+                withCredentials([usernamePassword(credentialsId: 'github-username-credential', passwordVariable: 'pwd', usernameVariable: 'username')]) {
                         varVal = pwd
                     }
                 echo "Job-Jenkins Cred Val  : ${varVal}"
