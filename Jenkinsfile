@@ -6,7 +6,7 @@ pipeline {
             steps {
                 script{
                     varVal =null
-                withCredentials([conjurSecretCredential(credentialsId: 'jenkins-app-dbPassword', variable: 'CONJUR_SECRET')]) {
+                withCredentials([conjurSecretCredential(credentialsId: 'folder-1-regression-credential1', variable: 'CONJUR_SECRET')]) {
                         varVal = CONJUR_SECRET
                     }
                 echo "Folder-1-Conjur Cred Val  : ${varVal}"
@@ -18,7 +18,7 @@ pipeline {
             steps {
                 script{
                     varVal =null
-                withCredentials([conjurSecretUsername(credentialsId: 'APIKey-username-ID', passwordVariable: 'CONJUR_SECRET', usernameVariable: 'USERNAME')]) {
+                withCredentials([conjurSecretUsername(credentialsId: 'folder-2-job-conjursecretusername-ID', passwordVariable: 'CONJUR_SECRET', usernameVariable: 'USERNAME')]) {
                         varVal = CONJUR_SECRET
                     }
                 echo "Folder-1-Conjur Cred Val  : ${varVal}"
@@ -30,7 +30,7 @@ pipeline {
             steps {
                 script{
                     varVal =null
-                withCredentials([usernamePassword(credentialsId: 'global-username-pwd-jenkins-credentials-ID', passwordVariable: 'pwd', usernameVariable: 'username')]) {
+                withCredentials([usernamePassword(credentialsId: 'folder-level-username-pwd-ID', passwordVariable: 'pwd', usernameVariable: 'username')]) {
                         varVal = pwd
                     }
                 echo "Job-Jenkins Cred Val  : ${varVal}"
