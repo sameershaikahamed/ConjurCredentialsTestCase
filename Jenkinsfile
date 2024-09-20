@@ -37,6 +37,21 @@ pipeline {
                 }
             }
         }
+
+           stage('Git-Folder-level-Job-Jenkins-Credentials') {
+            steps {
+                script{
+                    varVal =null
+                    varPwd =null
+                withCredentials([usernamePassword(credentialsId: 'folder-level-username-pwd-ID', passwordVariable: 'pwd', usernameVariable: 'username')]) {
+                        varVal = username
+                        varPwd = pwd
+                    }
+                echo "Folder-1-Jenkins Cred Val User : ${varVal}"
+                  echo "Folder-1-Jenkins  Cred Val pwd : ${varPwd}"
+                }
+            }
+        }
         
           
     }
