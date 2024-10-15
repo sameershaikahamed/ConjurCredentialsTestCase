@@ -9,7 +9,19 @@ pipeline {
                 withCredentials([conjurSecretCredential(credentialsId: 'no-folder-bitbucket-credential1', variable: 'CONJUR_SECRET')]) {
                         varVal = CONJUR_SECRET
                     }
-                echo "Folder-1-Conjur Bitbucket  Cred Val  : ${varVal}"
+                echo "Folder-1-Conjur Bitbucket Conjur Cred Cred Val  : ${varVal}"
+                }
+            }
+        }
+
+            stage('Multibranch-bitbucket-Conur-Secret-Username-Credentials') {
+            steps {
+                script{
+                    varVal =null
+                    withCredentials([conjurSecretUsername(credentialsId: 'bitbucket-StandAlone-Conjur-Username-Cred-ID', passwordVariable: 'CONJUR_SECRET', usernameVariable: 'USERNAME')]) {
+                        varVal = CONJUR_SECRET
+                    }
+                echo "Folder-1-Conjur Bitbucket Conjur Secret Username Cred Val  : ${varVal}"
                 }
             }
         }
