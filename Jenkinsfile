@@ -7,7 +7,7 @@ pipeline {
                 script{
                     varVal =null
                 //withCredentials([conjurSecretCredential(credentialsId: 'multi-folder-level-bitbucket-credential1', variable: 'CONJUR_SECRET')]) {
-                    withCredentials([conjurSecretCredential(credentialsId: 'no-folder-bitbucket-credential1', variable: 'CONJUR_SECRET')]) {
+                    withCredentials([conjurSecretCredential(credentialsId: 'multi-branch-level-standalone-credential1', variable: 'CONJUR_SECRET')]) {
                     
                         varVal = CONJUR_SECRET
                     }
@@ -16,7 +16,7 @@ pipeline {
             }
         }
 
-            stage('Multibranch-bitbucket-Conur-Secret-Username-Credentials') {
+            /*stage('Multibranch-bitbucket-Conur-Secret-Username-Credentials') {
             steps {
                 script{
                     varVal =null
@@ -28,6 +28,6 @@ pipeline {
                 echo "Folder-1-Conjur Bitbucket Conjur Secret Username Cred Val  : ${varVal}"
                 }
             }
-        }
+        }*/
     }
 }
