@@ -1,13 +1,12 @@
 pipeline {
-  agent  any
-tools {
-      maven 'Maven 3.9.9' // Name of the Maven installation in Jenkins Global Tool Configuration
+    agent any
+    tools {
+        maven 'Maven' // Name must match the Maven installation in Jenkins Global Tool Configuration
     }
-environment {
-        SONARQUBE = 'SonarQube_Server' // Name of SonarQube instance in Jenkins configuration
+    environment {
+        SONARQUBE = 'SonarQube_Server' // Name of the SonarQube server in Jenkins configuration
     }
-  stages {
-  stages {
+    stages {
         stage('Checkout') {
             steps {
                 checkout scm
@@ -18,14 +17,12 @@ environment {
                 sh 'mvn clean package'
             }
         }
-    stage('Scan') {
-      steps {
-        withSonarQubeEnv(installationName: 'SONARQUBE') { 
-          sh 'mvn sonar:sonar'
-         // sh './mvnw clean org.sonarsource.scanner.maven:sonar-maven-plugin:3.9.0.2155:sonar'
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv("${SONARQUBE}") { 
+                    sh 'mvn sonar:sonar'
+                }
+            }
         }
-      }
     }
-  }
-}
 }
