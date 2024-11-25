@@ -1,7 +1,7 @@
 pipeline {
     agent any
     tools {
-        maven 'Maven' // Name must match the Maven installation in Jenkins Global Tool Configuration
+        maven 'maven' // Name must match the Maven installation in Jenkins Global Tool Configuration
     }
     environment {
         SONARQUBE = 'SonarQube_Server' // Name of the SonarQube server in Jenkins configuration
