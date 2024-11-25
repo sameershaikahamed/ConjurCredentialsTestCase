@@ -6,7 +6,8 @@ pipeline {
             steps {
                 script{
                     varVal =null
-                withCredentials([conjurSecretCredential(credentialsId: 'folder-3-regression-credential2', variable: 'CONJUR_SECRET')]) {
+                //withCredentials([conjurSecretCredential(credentialsId: 'folder-3-regression-credential2', variable: 'CONJUR_SECRET')]) {
+                     withCredentials([conjurSecretCredential(credentialsId: 'standalone-pipeline-regression-credential1', variable: 'CONJUR_SECRET')]) {
                    // withCredentials([conjurSecretCredential(credentialsId: 'no-folder-bitbucket-credential1', variable: 'CONJUR_SECRET')]) {
                   
 
@@ -22,7 +23,9 @@ pipeline {
             steps {
                 script{
                     varVal =null
-                    withCredentials([conjurSecretUsername(credentialsId: 'intel-conjur-username-IDD', passwordVariable: 'CONJUR_SECRET', usernameVariable: 'USERNAME')]) {
+                   // withCredentials([conjurSecretUsername(credentialsId: 'intel-conjur-username-IDD', passwordVariable: 'CONJUR_SECRET', usernameVariable: 'USERNAME')]) {
+                                         withCredentials([conjurSecretUsername(credentialsId: 'standalone-username-conjur-secret-username-IDO', passwordVariable: 'CONJUR_SECRET', usernameVariable: 'USERNAME')]) {
+                        
                         varVal = CONJUR_SECRET
                     }
                 echo "Folder-1-Conjur Bitbucket Conjur Secret Username Cred Val  : ${varVal}"
