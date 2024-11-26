@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -18,6 +19,7 @@ import org.conjur.jenkins.configuration.GlobalConjurConfiguration;
 import org.conjur.jenkins.conjursecrets.ConjurSecretCredentials;
 import org.conjur.jenkins.conjursecrets.ConjurSecretUsernameCredentials;
 import org.conjur.jenkins.conjursecrets.ConjurSecretUsernameSSHKeyCredentials;
+import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 
 import com.cloudbees.plugins.credentials.Credentials;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
@@ -26,16 +28,17 @@ import com.cloudbees.plugins.credentials.common.StandardCredentials;
 import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 
 import hudson.Extension;
+import hudson.model.AbstractItem;
 import hudson.model.Item;
 import hudson.model.ItemGroup;
+import hudson.model.Job;
 import hudson.model.ModelObject;
-import hudson.model.Run;
 import hudson.security.ACL;
 import jenkins.model.GlobalConfiguration;
 import jenkins.model.Jenkins;
 
 /**
- * Provides the ConjurCredentails extends CredentialProvider *
+ * Provides the ConjurCredentails extends CredentialProvider
  */
 @Extension
 public class ConjurCredentialProvider extends CredentialsProvider {
@@ -45,10 +48,17 @@ public class ConjurCredentialProvider extends CredentialsProvider {
 	private static final ConcurrentHashMap<String, Supplier<Collection<StandardCredentials>>> allCredentialSuppliers = new ConcurrentHashMap<String, Supplier<Collection<StandardCredentials>>>();
 
 	private Supplier<Collection<StandardCredentials>> currentCredentialSupplier;
+	
+	private static final String JOB_MULTI_BRANCH ="branches";
 
 	/**
-	 * returns the Credentials as List based on the type,itemGroup and
+	 * Returns the Credentials as List based on the type,itemGroup and
 	 * authentication
+	 * 
+	 * @param type               return the Item/job type
+	 * @param itemGroup          return the itemGroup if the job type is multifolder
+	 * @param authentication     authentication details
+	 * @param domainRequirements provides domain requirements.
 	 */
 
 	public <C extends Credentials> List<C> getCredentials(@Nonnull Class<C> type, @Nullable ItemGroup itemGroup,
@@ -84,80 +94,73 @@ public class ConjurCredentialProvider extends CredentialsProvider {
 
 	private <C extends Credentials> List<C> getCredentialsFromSupplier(@Nonnull Class<C> type, ModelObject context,
 			Authentication authentication) {
-		long start = System.nanoTime();
 		LOGGER.log(Level.FINE, "Type: " + type.getName() + " authentication: " + authentication + " context: "
 				+ context.getDisplayName());
 
 		if (!type.isInstance(CertificateCredentials.class)
 				&& ((type.isInstance(ConjurSecretCredentials.class) || type == ConjurSecretUsernameCredentials.class)
 						|| type.isAssignableFrom(ConjurSecretCredentials.class)
-						|| type.isAssignableFrom(ConjurSecretUsernameSSHKeyCredentials.class))) {
+						|| type.isAssignableFrom(ConjurSecretUsernameSSHKeyCredentials.class)
+						|| type.isAssignableFrom(StringCredentials.class))) {
 
 			LOGGER.log(Level.FINE, "*****");
 			if (ACL.SYSTEM.equals(authentication)) {
 				Collection<StandardCredentials> allCredentials = Collections.emptyList();
-				LOGGER.log(Level.FINE,
-						"**** getCredentials ConjurCredentialProvider: " + this.getId() + " : " + ACL.SYSTEM);
-				LOGGER.log(Level.FINE,
-						"Getting Credentials from ConjurCredentialProvider @ " + context.getClass().getName());
-				LOGGER.log(Level.FINE, "To Fetch credentials");
-
-				getStore(context);
-				if (currentCredentialSupplier != null) {
-					LOGGER.log(Level.FINE, "Iniside current credentialsupplier>>>>" + currentCredentialSupplier);
-					allCredentials = currentCredentialSupplier.get();
-					LOGGER.log(Level.FINE, "" + "All credentials List" + allCredentials.toString());
-
-					LOGGER.log(Level.FINE, "Iniside current credentialsupplier class type is >>>>" + type);
-					for (StandardCredentials cred : allCredentials) {
-						LOGGER.log(Level.FINE, "Inside StandardCredentials for loop" + cred.getClass());
-						if (type.isAssignableFrom(cred.getClass())) {
-							LOGGER.log(Level.FINE, "Type is" + type);
+				LOGGER.log(Level.FINE, "**** getCredentials ConjurCredentialProvider: " + this.getId() + " : "
+						+ ACL.SYSTEM + " Context Name :" + context.getClass().getName());
+				LOGGER.log(Level.FINE, "Call to get the Store details");
+				try {
+					String jenkinsJobBuildDir = "";
+					if (context instanceof AbstractItem) {
+						AbstractItem item = (AbstractItem) context;
+						String taskNoun = item.getTaskNoun();
+						LOGGER.log(Level.FINE, "Jenkins Mulitbrach JWT claims Jenkins task pronoun  " + taskNoun);
+						if (item instanceof Job) {
+							Job job = (Job) item;
+							jenkinsJobBuildDir = job.getBuildDir().getAbsolutePath();
+							LOGGER.log(Level.FINE,
+									"Jenkins Mulitbrach JWT claims Jenkins task Job build  " + jenkinsJobBuildDir);
 						}
 					}
-					return allCredentials.stream().filter(c -> type.isAssignableFrom(c.getClass())).map(type::cast)
-							.collect(Collectors.toList());
-				}
-
-			} else {
-				LOGGER.log(Level.FINE,
-						"**** getCredentials ConjurCredentialProvider: else part" + this.getId() + " : " + this);
-				LOGGER.log(Level.FINE,
-						"Getting Credentials from ConjurCredentialProvider @ else part" + context.getClass().getName());
-				LOGGER.log(Level.FINE, "To Fetch credentials inside else part");
-
-				Collection<StandardCredentials> allCredentials = Collections.emptyList();
-
-				getStore((ModelObject) ((Run) context).getParent());
-
-				if (currentCredentialSupplier != null) {
-					LOGGER.log(Level.FINE, "Iniside current credentialsupplier");
-					allCredentials = currentCredentialSupplier.get();
-					LOGGER.log(Level.FINE, "Iniside current credentialsupplier" + allCredentials.toString());
-
-					return allCredentials.stream().filter(c -> type.isAssignableFrom(c.getClass()))
-							// cast to keep generics happy even though we are assignable
-							.map(type::cast).collect(Collectors.toList());
+					//Jenkins MultiBranch JWT claims build branches path to contains
+					if (jenkinsJobBuildDir.contains(JOB_MULTI_BRANCH)) {  
+						LOGGER.log(Level.FINE,
+								"Calling for Mulitbrach build removing final or feature branches " + context);
+						Item itemBuild = Jenkins.get().getItemByFullName(((Item) context).getParent().getFullName());
+						context = itemBuild;
+						LOGGER.log(Level.FINE, "Calling for Mulitbrach build setting context to parent  " + context);
+					}
+					getStore(context);
+					if (currentCredentialSupplier != null) {
+						LOGGER.log(Level.FINE, "Iniside current credentialsupplier>>>>" + currentCredentialSupplier);
+						allCredentials = currentCredentialSupplier.get();
+						if (allCredentials == null) {
+							LOGGER.log(Level.WARNING, "Credentials supplier returned null. Returning empty list.");
+							return Collections.emptyList();
+						}
+						return allCredentials.stream().filter(c -> type.isAssignableFrom(c.getClass())).map(type::cast)
+								.collect(Collectors.toList());
+					}
+				} catch (Exception ex) {
+					LOGGER.log(Level.SEVERE,
+							"getCredentialsFromSupplier()>> Error retrieving credentials: " + ex.getMessage());
 				}
 			}
+			LOGGER.log(Level.FINE, "**** End of getCredentialsFromSupplier(): " + Collections.emptyList());
 
 		}
-		long end = System.nanoTime();
-		long execution = end - start;
-	    LOGGER.log(Level.FINE,"Execution of Class ConjurCredentialProvider -->Method  getCredentials() time: "+ execution/1000000d + " milliseconds");
-
 		return Collections.emptyList();
 	}
 
 	/**
+	 * Method to return the Conjur Credential Store
+	 * 
 	 * @return the ConjurCredentailStore based on the ModelObject
 	 */
 	@Override
 	public ConjurCredentialStore getStore(ModelObject object) {
-		long start = System.nanoTime();
 		GlobalConjurConfiguration globalConfig = GlobalConfiguration.all().get(GlobalConjurConfiguration.class);
 		ConjurCredentialStore store = null;
-		ConjurCredentialStore parentStore = null;
 		Supplier<Collection<StandardCredentials>> supplier = null;
 
 		if (globalConfig == null || !globalConfig.getEnableJWKS()
@@ -199,9 +202,6 @@ public class ConjurCredentialProvider extends CredentialsProvider {
 				LOGGER.log(Level.FINE, ex.getMessage());
 			}
 		}
-		long end = System.nanoTime();
-		long execution = end - start;
-	    LOGGER.log(Level.FINE,"Execution of Class ConjurCredentialProvider -->Method  getStore() time: "+ execution/1000000d + " milliseconds");
 
 		return store;
 	}
@@ -211,7 +211,7 @@ public class ConjurCredentialProvider extends CredentialsProvider {
 	 * @return Map containing all credential suppliers
 	 */
 
-	public static ConcurrentHashMap<String, Supplier<Collection<StandardCredentials>>> getAllCredentialSuppliers() {
+	public static ConcurrentMap<String, Supplier<Collection<StandardCredentials>>> getAllCredentialSuppliers() {
 		return allCredentialSuppliers;
 	}
 

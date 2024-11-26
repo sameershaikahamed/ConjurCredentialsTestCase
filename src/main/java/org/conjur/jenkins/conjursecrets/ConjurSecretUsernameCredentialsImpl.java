@@ -26,15 +26,10 @@ import jenkins.model.Jenkins;
 
 /**
  * Class to get the secret for UserNameCredential
- * 
- * @author Jaleela.FaizurRahman
- *
  */
 @NameWith(value = ConjurSecretCredentials.NameProvider.class, priority = 1)
 public class ConjurSecretUsernameCredentialsImpl extends BaseStandardCredentials
 		implements ConjurSecretUsernameCredentials {
-
-	private static final Logger LOGGER = Logger.getLogger(ConjurSecretUsernameCredentialsImpl.class.getName());
 
 	private String username;
 	private String credentialID;
@@ -117,20 +112,15 @@ public class ConjurSecretUsernameCredentialsImpl extends BaseStandardCredentials
 	 */
 	@DataBoundSetter
 	public void setConjurConfiguration(ConjurConfiguration conjurConfiguration) {
-
 		ConjurAPI.logConjurConfiguration(conjurConfiguration);
-
 		this.conjurConfiguration = conjurConfiguration;
-
-		ConjurSecretCredentials.setConjurConfigurationForCredentialWithID(this.getCredentialID(), conjurConfiguration, context);
+		ConjurSecretCredentials.setConjurConfigurationForCredentialWithID(this.getCredentialID(), conjurConfiguration,
+				context);
 
 	}
 
 	/**
 	 * static inner class to populate the list box for credentialswithID
-	 * 
-	 * @author Jaleela.FaizurRahman
-	 *
 	 */
 
 	@Extension
@@ -171,7 +161,6 @@ public class ConjurSecretUsernameCredentialsImpl extends BaseStandardCredentials
 	 */
 	@Override
 	public void setContext(ModelObject context) {
-		LOGGER.log(Level.FINE, "Set Context");
 		if (context != null)
 			this.context = context;
 	}
@@ -181,7 +170,6 @@ public class ConjurSecretUsernameCredentialsImpl extends BaseStandardCredentials
 	 */
 	@Override
 	public void setStoreContext(ModelObject storeContext) {
-		LOGGER.log(Level.FINE, "Set Store Context");
 		if (storeContext != null)
 			this.storeContext = storeContext;
 	}
@@ -199,8 +187,9 @@ public class ConjurSecretUsernameCredentialsImpl extends BaseStandardCredentials
 	 */
 	@Override
 	public Secret getPassword() {
-		LOGGER.log(Level.FINE, "Getting Password");
-		return ConjurSecretCredentials.getSecretFromCredentialIDWithConfigAndContext(this.getCredentialID(), this.conjurConfiguration, this.context, this.storeContext);
+		return ConjurSecretCredentials.getSecretFromCredentialIDWithConfigAndContext(this.getCredentialID(),
+				this.conjurConfiguration, this.context, this.storeContext);
+
 	}
 
 	/**

@@ -2,13 +2,19 @@ package org.conjur.jenkins.api;
 
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import org.conjur.jenkins.configuration.ConjurConfiguration;
+import org.conjur.jenkins.configuration.ConjurJITJobProperty;
+import org.conjur.jenkins.configuration.FolderConjurConfiguration;
+import org.conjur.jenkins.configuration.GlobalConjurConfiguration;
+import org.conjur.jenkins.jwtauth.impl.JwtToken;
 
 import com.cloudbees.hudson.plugins.folder.AbstractFolder;
 import com.cloudbees.plugins.credentials.CredentialsMatchers;
@@ -17,13 +23,6 @@ import com.cloudbees.plugins.credentials.common.UsernamePasswordCredentials;
 import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-
-import org.conjur.jenkins.configuration.ConjurConfiguration;
-import org.conjur.jenkins.configuration.ConjurJITJobProperty;
-import org.conjur.jenkins.configuration.FolderConjurConfiguration;
-import org.conjur.jenkins.configuration.GlobalConjurConfiguration;
-import org.conjur.jenkins.jwtauth.impl.JwtToken;
-
 import hudson.model.AbstractItem;
 import hudson.model.Item;
 import hudson.model.ItemGroup;
@@ -39,10 +38,22 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 /**
- * The ConjurAPI class authenticates the request based on the configuration and
- * retrieves secret from Conjur Vault
+ * The ConjurAPI class provides the service to authenticate and retrieve secrets
+ * based on API Key/JWT authentication using the Conjur Configuration details
+ * configured either through the Jenkins Global configuration form or as
+ * environment. The request to authenticate (API Key/JWT) will be processed in
+ * Conjur Server and return authorised(200-OK) or unauthorised code
+ * (401-UnAuthorized) code. The request to fetch the secrets based on the
+ * credetnialID will be processed only if the authentication is successful. Upon
+ * successful authentication , the request to fetch the secret is processed and
+ * returns secrets if available. The request to fetch secrets first checks if
+ * the credentialId is available and having grant permission based on identity
+ * If CredentialID is not found ,returns <b>Credential NotFound message</b>. If
+ * CredentialID does not have permission , returns <b>401 UnAuthorized
+ * message</b>. If secrets not available for the CredentialID ,returns
+ * <b>Credential ID is empty message</b>.
  */
-public class ConjurAPI {  
+public class ConjurAPI {
 	/**
 	 * static constructor to set the Conjur Auth Configuration Info
 	 */
@@ -56,7 +67,15 @@ public class ConjurAPI {
 
 	private static final Logger LOGGER = Logger.getLogger(ConjurAPI.class.getName());
 
-	private static void defaultToEnvironment(ConjurAuthnInfo conjurAuthn) {
+	/**
+	 * Set the ConjurAuthnInfo with the environment variables
+	 * 
+	 * @param conjurAuthn
+	 */
+
+	private static  void defaultToEnvironment(ConjurAuthnInfo conjurAuthn) {
+		LOGGER.log(Level.FINE, "Start of defaultToEnvironment()");
+
 		Map<String, String> env = System.getenv();
 		if (conjurAuthn.applianceUrl == null && env.containsKey("CONJUR_APPLIANCE_URL"))
 			conjurAuthn.applianceUrl = env.get("CONJUR_APPLIANCE_URL");
@@ -66,58 +85,91 @@ public class ConjurAPI {
 			conjurAuthn.login = env.get("CONJUR_AUTHN_LOGIN");
 		if (conjurAuthn.apiKey == null && env.containsKey("CONJUR_AUTHN_API_KEY"))
 			conjurAuthn.apiKey = env.get("CONJUR_AUTHN_API_KEY");
+		LOGGER.log(Level.FINE, "End of defaultToEnvironment()");
 	}
 
 	/**
-	 * Retrieves the authorization token based on the Configuration.
+	 * Method to build the client authentication API Key/JWT request based on the
+	 * ConjurConfiguration.
 	 * 
-	 * @param OkHttpClient        client to process request
-	 * @param ConjurConfiguration with configuration info
-	 * @param Jenkins             ModelObject context
-	 * @return AuthorizationToken to authenticate the request
-	 * @throws IOException
+	 * @param client        OkHttp builds HTTP/HTTP/2 client that shares the same
+	 *                      connection,thread pool and configuration.
+	 * @param configuration ConjurConfiguration object containing
+	 *                      account,applianceUrl,credentialID,certificateCredentialID,ownerFullName.
+	 * @param context       current context in which Jenkins Job are running
+	 * @return status code to 200-OK if request is authenticated or 401 if
+	 *         Unauthorized
+	 * @throws IOException in case of error connecting to Conjur Server
 	 */
-	@SuppressWarnings("deprecation")
 	@SuppressFBWarnings
-	public static String getAuthorizationToken(OkHttpClient client, ConjurConfiguration configuration,
+	public static  String getAuthorizationToken(OkHttpClient client, ConjurConfiguration configuration,
 			ModelObject context) throws IOException {
-		long start = System.nanoTime();
-		LOGGER.log(Level.FINE, "getAuthorizationToken input params"+"Client:"+client +"Configuration:" +configuration);
+		LOGGER.log(Level.FINE, "Start of getAuthorizationToken()");
+		LOGGER.log(Level.INFO,
+				"getAuthorizationToken input params" + "Client:" + client + "Configuration:" + configuration);
 		String resultingToken = null;
 
 		List<UsernamePasswordCredentials> availableCredentials = null;
 
-		availableCredentials = CredentialsProvider.lookupCredentials(UsernamePasswordCredentials.class,
-				Jenkins.get(), ACL.SYSTEM, Collections.<DomainRequirement>emptyList());
+		availableCredentials = CredentialsProvider.lookupCredentials(UsernamePasswordCredentials.class, Jenkins.get(),
+				ACL.SYSTEM, Collections.<DomainRequirement>emptyList());
 
 		if (context != null) {
 			if (context instanceof Run) {
 				availableCredentials.addAll(CredentialsProvider.lookupCredentials(UsernamePasswordCredentials.class,
-				((Run) context).getParent(), ACL.SYSTEM, Collections.<DomainRequirement>emptyList()));
+						((Run) context).getParent(), ACL.SYSTEM, Collections.<DomainRequirement>emptyList()));
 			} else {
-				if((context instanceof AbstractItem)) {
-				availableCredentials.addAll(CredentialsProvider.lookupCredentials(UsernamePasswordCredentials.class,
-				(AbstractItem) context, ACL.SYSTEM, Collections.<DomainRequirement>emptyList()));
-			      }
-		    }
+				if ((context instanceof AbstractItem)) {
+					availableCredentials.addAll(CredentialsProvider.lookupCredentials(UsernamePasswordCredentials.class,
+							(AbstractItem) context, ACL.SYSTEM, Collections.<DomainRequirement>emptyList()));
+				}
+			}
 		}
 
 		ConjurAuthnInfo conjurAuthn = getConjurAuthnInfo(configuration, availableCredentials, context);
+		GlobalConjurConfiguration globalConfig = GlobalConfiguration.all().get(GlobalConjurConfiguration.class);
+		if(globalConfig != null) {
+		ConjurConfiguration globalConjurConfig = globalConfig.getConjurConfiguration();
+			if(conjurAuthn.account ==null || conjurAuthn.account.isEmpty()){
+				conjurAuthn.account = globalConjurConfig.getAccount();
+			}
+			if(conjurAuthn.applianceUrl ==null || conjurAuthn.applianceUrl.isEmpty()){
+				conjurAuthn.applianceUrl = globalConjurConfig.getApplianceURL();
+			}
+		}
+		if (globalConfig != null && globalConfig.getEnableJWKS()) {
+			LOGGER.log(Level.FINE, "JWT is enabled.");
+			if (!globalConfig.getEnableIdentityFormatFieldsFromToken())// Simplified JWT is disabled
+			{
+				LOGGER.log(Level.FINE, "Simplified JWT is disabled.");
+				List<String> identityFields = Arrays.asList(globalConfig.getIdentityFormatFieldsFromToken().split(","));
+				if(!identityFields.contains("jenkins_full_name"))
+				{
+					if(!identityFields.contains("jenkins_parent_full_name") || !identityFields.contains("jenkins_name"))
+					{
+						throw new RuntimeException(
+								"Invalid configuration on conjur jenkins plugin. Ensure Identity format fields are configured correctly.");
+					}
+				}
+			}
+		}
 
 		Request request = null;
 		if (conjurAuthn.login != null && conjurAuthn.apiKey != null) {
-			LOGGER.log(Level.FINE, "Authenticating with Conjur (authn)");
+			LOGGER.log(Level.FINE, "Creating authentication request for API Key authentication with Conjur");
 			request = new Request.Builder()
-				.url(String.format("%s/%s/%s/%s/authenticate", conjurAuthn.applianceUrl, conjurAuthn.authnPath,
-						conjurAuthn.account, URLEncoder.encode(conjurAuthn.login, "utf-8")))
-				.post(RequestBody.create(MediaType.parse("text/plain"), conjurAuthn.apiKey)).build();
+					.url(String.format("%s/%s/%s/%s/authenticate", conjurAuthn.applianceUrl, conjurAuthn.authnPath,
+							conjurAuthn.account, URLEncoder.encode(conjurAuthn.login, "utf-8")))
+					.post(RequestBody.create(MediaType.parse("text/plain"), conjurAuthn.apiKey)).build();
 		} else if (conjurAuthn.authnPath != null && conjurAuthn.apiKey != null) {
-			String authnPath = conjurAuthn.authnPath.indexOf("/") == -1 ? "authn-jwt/" + conjurAuthn.authnPath : conjurAuthn.authnPath;
+			LOGGER.log(Level.FINE, "Creating authentication request for JWT authentication with Conjur");
+			String authnPath = conjurAuthn.authnPath.indexOf("/") == -1 ? "authn-jwt/" + conjurAuthn.authnPath
+					: conjurAuthn.authnPath;
 			LOGGER.log(Level.FINE, "Authenticating with Conjur (JWT) authnPath={0}", authnPath);
 			request = new Request.Builder()
-				.url(String.format("%s/%s/%s/authenticate", conjurAuthn.applianceUrl, authnPath,
-						conjurAuthn.account))
-				.post(RequestBody.create(MediaType.parse("text/plain"), conjurAuthn.apiKey)).build();
+					.url(String.format("%s/%s/%s/authenticate", conjurAuthn.applianceUrl, authnPath,
+							conjurAuthn.account))
+					.post(RequestBody.create(MediaType.parse("text/plain"), conjurAuthn.apiKey)).build();
 
 		}
 
@@ -128,16 +180,13 @@ public class ConjurAPI {
 			LOGGER.log(Level.FINEST,
 					() -> "Conjur Authenticate response " + response.code() + " - " + response.message());
 			if (response.code() != 200) {
+
 				throw new IOException("Error authenticating to Conjur [" + response.code() + " - " + response.message()
 						+ "\n" + resultingToken);
 			}
 		} else {
-			LOGGER.log(Level.FINE, "Failed to find credentials for conjur authentication");
+			LOGGER.log(Level.FINE, "Failed to authenticate with conjur server");
 		}
-		long end = System.nanoTime();
-		long execution = end - start;
-	    LOGGER.log(Level.FINE,"Execution of Class ConjurAPI -->Method getAuthorizationToken() time: "+ execution/1000000d + " milliseconds");
-
 		return resultingToken;
 	}
 
@@ -151,7 +200,6 @@ public class ConjurAPI {
 	 */
 	public static ConjurAuthnInfo getConjurAuthnInfo(ConjurConfiguration configuration,
 			List<UsernamePasswordCredentials> availableCredentials, ModelObject context) {
-		long start = System.nanoTime();
 		LOGGER.log(Level.FINE, "Start of getConjurAuthnInfo()");
 		ConjurAuthnInfo conjurAuthn = new ConjurAuthnInfo();
 
@@ -181,15 +229,10 @@ public class ConjurAPI {
 		if (conjurAuthn.login == null && conjurAuthn.apiKey == null && context != null) {
 			setConjurAuthnForJITCredentialAccess(context, conjurAuthn);
 		}
-		long end = System.nanoTime();
-		long execution = end - start;
-	    LOGGER.log(Level.FINE,"Execution of Class ConjurAPI -->Method getConjurAuthnInfo() time:"+ execution/1000000d + " milliseconds");
 		LOGGER.log(Level.FINE, "End of getConjurAuthnInfo()");
 		return conjurAuthn;
 	}
-
 	private static void setConjurAuthnForJITCredentialAccess(ModelObject context, ConjurAuthnInfo conjurAuthn) {
-		long start = System.nanoTime();
 		LOGGER.log(Level.FINE, "Start of setConjurAuthnForJITCredentialAccess()");
 		String token = JwtToken.getToken(context);
 		GlobalConjurConfiguration globalconfig = GlobalConfiguration.all().get(GlobalConjurConfiguration.class);
@@ -199,18 +242,16 @@ public class ConjurAPI {
 			conjurAuthn.authnPath = globalconfig.getAuthWebServiceId();
 			conjurAuthn.apiKey = "jwt=" + token;
 		}
-		long end = System.nanoTime();
-		long execution = end - start;
-	    LOGGER.log(Level.FINE,"Execution of Class ConjurAPI -->Method setConjurAuthnForJITCredentialAccess() time: "+ execution/1000000d + " milliseconds");
 		LOGGER.log(Level.FINE, "End of setConjurAuthnForJITCredentialAccess()");
 	}
 
 	/**
-	 * Retrieves the secret for the key
+	 * This method gets the {@link ConjurAuthIno} data and retrieve the secret for the valid authenticationToken,account
+	 * variablePath. The request to fetch the secret are build using the OkHttp client.
 	 * 
-	 * @param OkHttpClient  to process request
-	 * @param Jenkins       configuration contianing the Conjur Config details
-	 * @param Authorization token to authenticate the request
+	 * @param client   OkHttp builds HTTP/HTTP/2 client that shares the same connection,thread pool and configuration.
+	 * @param configuration  {@link ConjurConfiguration} containing the Conjur authentication parameters 
+	 * @param authToken	 token to authenticate the request.
 	 * @param variablePath  for which to retrieve the secrets
 	 * @return the secrets for the specified variablePath
 	 * @throws IOException
@@ -219,10 +260,10 @@ public class ConjurAPI {
 	public static String getSecret(OkHttpClient client, ConjurConfiguration configuration, String authToken,
 			String variablePath) throws IOException {
 		LOGGER.log(Level.FINE, "Start of getSecret()");
-		long start = System.nanoTime();
+		
 		ConjurAuthnInfo conjurAuthn = getConjurAuthnInfo(configuration, null, null);
 
-		LOGGER.log(Level.FINEST, "Fetching secret from Conjur");
+		LOGGER.log(Level.FINEST, "Fetching secret from Conjur Server");
 		Request request = new Request.Builder().url(
 				String.format("%s/secrets/%s/variable/%s", conjurAuthn.applianceUrl, conjurAuthn.account, variablePath))
 				.get().addHeader("Authorization", "Token token=\"" + authToken + "\"").build();
@@ -235,9 +276,7 @@ public class ConjurAPI {
 			throw new IOException("Error fetching secret from Conjur [" + response.code() + " - " + response.message()
 					+ "\n" + result);
 		}
-		long end = System.nanoTime();
-		long execution = end - start;
-	    LOGGER.log(Level.FINE,"Execution of Class ConjurAPI --->Method getSecret() time: "+ execution/1000000d + " milliseconds");
+		
 		LOGGER.log(Level.FINE, "End of getSecret()");
 		return result;
 	}
@@ -245,8 +284,9 @@ public class ConjurAPI {
 	/**
 	 * Log the Conjur Configuration details
 	 * 
-	 * @param to log the ConjurConfiguration from Jenkins configuration
-	 * @return the Conjur Configuration parameters
+	 * @param conjurConfiguration log the ConjurConfiguration from Jenkins
+	 *                            configuration
+	 * @return ConjurConfiguration log the Conjur Configuration parameters
 	 */
 	public static ConjurConfiguration logConjurConfiguration(ConjurConfiguration conjurConfiguration) {
 		LOGGER.log(Level.FINE, "Start of logConjurConfiguration()");
@@ -262,7 +302,6 @@ public class ConjurAPI {
 
 	private static void initializeWithCredential(ConjurAuthnInfo conjurAuthn, String credentialID,
 			List<UsernamePasswordCredentials> availableCredentials) {
-		long start = System.nanoTime();
 		LOGGER.log(Level.FINE, "Start of initializeWithCredential()");
 		if (credentialID != null && !credentialID.isEmpty()) {
 			LOGGER.log(Level.FINEST, "Retrieving Conjur credential stored in Jenkins");
@@ -273,9 +312,6 @@ public class ConjurAPI {
 				conjurAuthn.apiKey = credential.getPassword().getPlainText();
 			}
 		}
-		long end = System.nanoTime();
-		long execution = end - start;
-	    LOGGER.log(Level.FINE,"Execution of Class ConjurAPI -->Method initializeWithCredential() time: "+ execution/1000000d + " milliseconds");
 		LOGGER.log(Level.FINE, "End of initializeWithCredential()");
 	}
 
@@ -288,11 +324,10 @@ public class ConjurAPI {
 	 */
 
 	public static ConjurConfiguration getConfigurationFromContext(ModelObject context, ModelObject storeContext) {
-		long start = System.nanoTime();
 		LOGGER.log(Level.FINE, "Start of getConfigurationFromContext()");
 		ModelObject effectiveContext = context != null ? context : storeContext;
 
-        Item contextObject = null;
+		Item contextObject = null;
 		ConjurJITJobProperty conjurJobConfig = null;
 
 		if (effectiveContext instanceof Run) {
@@ -304,7 +339,6 @@ public class ConjurAPI {
 			LOGGER.log(Level.FINE, "getConfigurationFromContext():instanceOf AbstractItem");
 			contextObject = (Item) effectiveContext;
 		}
-
 
 		ConjurConfiguration conjurConfig = GlobalConjurConfiguration.get().getConjurConfiguration();
 
@@ -324,16 +358,12 @@ public class ConjurAPI {
 			return ConjurAPI.logConjurConfiguration(inheritedConfig);
 		}
 		LOGGER.log(Level.FINE, "End of getConfigurationFromContext()");
-		long end = System.nanoTime();
-		long execution = end - start;
-	    LOGGER.log(Level.FINE,"Execution of Class ConjurAPI -->Method getConfigurationFromContext() time: "+ execution/1000000d + " milliseconds");
 		return ConjurAPI.logConjurConfiguration(conjurConfig);
 
 	}
 
 	@SuppressWarnings("unchecked")
 	private static ConjurConfiguration inheritedConjurConfiguration(Item job) {
-		long start = System.nanoTime();
 		LOGGER.log(Level.FINE, "Start of inheritedConjurConfiguration()");
 		for (ItemGroup<? extends Item> g = job != null ? job.getParent()
 				: null; g instanceof AbstractFolder; g = ((AbstractFolder<? extends Item>) g).getParent()) {
@@ -345,9 +375,6 @@ public class ConjurAPI {
 			}
 		}
 		LOGGER.log(Level.FINE, "End of inheritedConjurConfiguration()");
-		long end = System.nanoTime();
-		long execution = end - start;
-	    LOGGER.log(Level.FINE,"Execution of Class ConjurAPI -->Method inheritedConjurConfiguration() time: "+ execution/1000000d + " milliseconds");
 		return null;
 	}
 

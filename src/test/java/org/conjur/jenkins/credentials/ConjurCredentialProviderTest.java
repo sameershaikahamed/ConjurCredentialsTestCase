@@ -3,20 +3,18 @@ package org.conjur.jenkins.credentials;
 
 import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.util.Collections;
 
+import org.mockito.junit.MockitoJUnitRunner;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.Mockito;
 
-@RunWith(PowerMockRunner.class)
+@RunWith(MockitoJUnitRunner.class)
 
-@PrepareForTest({ ConjurCredentialProvider.class })
 public class ConjurCredentialProviderTest {
 
 	@Mock
@@ -31,9 +29,12 @@ public class ConjurCredentialProviderTest {
 
 	@Test(expected = RuntimeException.class)
 	public void getCredentialsTest() throws Exception {
-		ConjurCredentialProvider classUnderTest = PowerMockito.spy(new ConjurCredentialProvider());
-		PowerMockito.when(classUnderTest, "getCredentialsFromSupplier", any(), any(), any())
-				.thenReturn(Collections.emptyList());
+
+		ConjurCredentialProvider classUnderTest = Mockito.spy(new ConjurCredentialProvider());
+		// Stub the private method using reflection
+		Mockito.doReturn(Collections.emptyList()).when(classUnderTest.getClass())
+				.getDeclaredMethod("getCredentialsFromSupplier", any(), any(), any());
 
 	}
+
 }

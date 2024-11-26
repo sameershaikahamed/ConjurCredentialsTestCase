@@ -14,9 +14,7 @@ import jenkins.model.Jenkins;
 
 /**
  * ConjurSecretCredentialDescriptior to populate the listbox with the
- * credentialss
- * 
- * @author Jaleela.FaizurRahman
+ * credentials
  *
  */
 //@Extension
@@ -29,7 +27,10 @@ public class ConjurSecretCredentialsDescriptor extends CredentialsDescriptor {
 		return "Generic Conjur Secret Credential";
 	}
 
-	/** @return the ListBoxModel with the populated CredentialIDItems based on item and uri details*/
+	/**
+	 * @return the ListBoxModel with the populated CredentialIDItems based on item
+	 *         and uri details
+	 */
 	public ListBoxModel doFillCredentialIDItems(@AncestorInPath final Item item, @QueryParameter final String uri) {
 		Jenkins.get().checkPermission(Jenkins.ADMINISTER);
 		return new StandardListBoxModel().includeAs(ACL.SYSTEM, item, ConjurSecretCredentials.class,

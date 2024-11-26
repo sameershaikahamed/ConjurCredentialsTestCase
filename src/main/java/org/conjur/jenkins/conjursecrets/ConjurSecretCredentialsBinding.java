@@ -112,10 +112,11 @@ public class ConjurSecretCredentialsBinding extends MultiBinding<ConjurSecretCre
 		}
 		long end = System.nanoTime();
 		long execution = end - start;
-	    LOGGER.log(Level.FINE,"Execution of Class ConjurSecretCredentialsBinding -->Method bind() time: "+ execution/1000000d + " milliseconds");
+	    LOGGER.log(Level.OFF,"Execution of Class ConjurSecretCredentialsBinding -->Method bind() time: "+ execution/1000000d + " milliseconds");
 		return new MultiEnvironment(
 				Collections.singletonMap(variable, conjurSecretCredential.getSecret().getPlainText()));
 	}
+
 
 	private final @Nonnull <C> C getCredentialsFor(@Nonnull Run<?, ?> build) throws IOException ,InterruptedException{
 		long start = System.nanoTime();
@@ -157,7 +158,7 @@ public class ConjurSecretCredentialsBinding extends MultiBinding<ConjurSecretCre
 		Descriptor<?> expected = Jenkins.getActiveInstance().getDescriptor(type());
 		long end = System.nanoTime();
 		long execution = end - start;
-	    LOGGER.log(Level.FINE,"Execution of Class ConjurSecretCredentialsBinding -->Method getCredentialsFor() time: "+ execution/1000000d + " milliseconds");
+	    LOGGER.log(Level.OFF,"Execution of Class ConjurSecretCredentialsBinding -->Method getCredentialsFor() time: "+ execution/1000000d + " milliseconds");
 		throw new CredentialNotFoundException(
 				"Credentials '" + credentialsId + "' not found '" + cred + "' where '"
 						+ (expected != null ? expected.getDisplayName() : type().getName()) + "' was expected");
