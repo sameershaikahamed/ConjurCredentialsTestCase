@@ -2,6 +2,7 @@ pipeline {
     agent any
     tools {
         maven 'maven' // Name must match the Maven installation in Jenkins Global Tool Configuration
+         
     }
     environment {
         SONARQUBE = 'SonarQube_Server' // Name of the SonarQube server in Jenkins configuration
@@ -21,6 +22,7 @@ pipeline {
             steps {
                 withSonarQubeEnv("${SONARQUBE}") { 
                     sh 'mvn sonar:sonar'
+
                 }
             }
         }
