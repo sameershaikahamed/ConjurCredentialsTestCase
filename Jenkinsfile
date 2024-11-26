@@ -23,7 +23,7 @@ pipeline {
             steps {
                 script{
                     varVal =null
-                   withCredentials([conjurSecretUsername(credentialsId: 'intel-conjur-username-IDD', passwordVariable: 'CONJUR_SECRET', usernameVariable: 'USERNAME')]) {
+                  withCredentials([conjurSecretUsername(credentialsId: 'IDDDDD-STANDALONE-USERNAME', passwordVariable: 'CONJUR_SECRET', usernameVariable: 'USERNAME')]) {
                                        //  withCredentials([conjurSecretUsername(credentialsId: 'standalone-username-conjur-secret-username-IDO', passwordVariable: 'CONJUR_SECRET', usernameVariable: 'USERNAME')]) {
                         
                         varVal = CONJUR_SECRET
