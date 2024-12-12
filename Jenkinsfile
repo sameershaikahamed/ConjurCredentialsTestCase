@@ -7,7 +7,7 @@ pipeline {
                 script{
                     varVal =null
                 //withCredentials([conjurSecretCredential(credentialsId: 'intel-multi-folder-job-credential1', variable: 'CONJUR_SECRET')]) {
-                     withCredentials([conjurSecretCredential(credentialsId: 'standalone-pipeline-regression-credential1', variable: 'CONJUR_SECRET')]) {
+                     withCredentials([conjurSecretCredential(credentialsId: 'intel-multi-folder-job-credential1', variable: 'CONJUR_SECRET')]) {
                    // withCredentials([conjurSecretCredential(credentialsId: 'no-folder-bitbucket-credential1', variable: 'CONJUR_SECRET')]) {
                   
 
