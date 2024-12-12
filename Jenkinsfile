@@ -19,7 +19,7 @@ pipeline {
             }
         }
       
-         stage('Multibranch-Git-Conur-Secret-Username-Credentials') {
+        /* stage('Multibranch-Git-Conur-Secret-Username-Credentials') {
             steps {
                 script{
                     varVal =null
@@ -31,7 +31,7 @@ pipeline {
                 echo "Folder-1-Conjur Bitbucket Conjur Secret Username Cred Val  : ${varVal}"
                 }
             }
-        }
+        }*/
       
     }
 }
