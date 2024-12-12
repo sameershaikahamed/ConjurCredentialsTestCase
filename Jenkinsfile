@@ -2,11 +2,11 @@ pipeline {
     agent any
 
     stages {
-        stage('Multibranch-bitbucket-Conur-Credentials') {
+        stage('Multibranch-Git-Conur-Credentials') {
             steps {
                 script{
                     varVal =null
-                //withCredentials([conjurSecretCredential(credentialsId: 'folder-3-regression-credential2', variable: 'CONJUR_SECRET')]) {
+                //withCredentials([conjurSecretCredential(credentialsId: 'intel-multi-branch-folder-job-credential1', variable: 'CONJUR_SECRET')]) {
                      withCredentials([conjurSecretCredential(credentialsId: 'standalone-pipeline-regression-credential1', variable: 'CONJUR_SECRET')]) {
                    // withCredentials([conjurSecretCredential(credentialsId: 'no-folder-bitbucket-credential1', variable: 'CONJUR_SECRET')]) {
                   
@@ -23,7 +23,7 @@ pipeline {
             steps {
                 script{
                     varVal =null
-                  withCredentials([conjurSecretUsername(credentialsId: 'IDDDDD-STANDALONE-USERNAME', passwordVariable: 'CONJUR_SECRET', usernameVariable: 'USERNAME')]) {
+                  withCredentials([conjurSecretUsername(credentialsId: 'Conjur-USERNAME-INTEL-FOLDER-JOB-ID', passwordVariable: 'CONJUR_SECRET', usernameVariable: 'USERNAME')]) {
                                        //  withCredentials([conjurSecretUsername(credentialsId: 'standalone-username-conjur-secret-username-IDO', passwordVariable: 'CONJUR_SECRET', usernameVariable: 'USERNAME')]) {
                         
                         varVal = CONJUR_SECRET
