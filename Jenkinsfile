@@ -16,8 +16,21 @@ pipeline {
                
             }
         }
-      
+
+        
             stage('Folder-1-Folder Job-Conur-Secret Username-Credentials') {
+            steps {
+                script{
+                    varVal =null
+              withCredentials([conjurSecretUsername(credentialsId: 'folder-job-intel-test-ID', passwordVariable: 'CONJUR_SECRET', usernameVariable: 'USERNAME')]) {
+                        varVal = CONJUR_SECRET
+                    }
+                echo "Folder-1-Conjur Cred Val  : ${varVal}"
+                }
+            }
+        }
+      
+            /*stage('Folder-1-Folder Job-Conur-Secret Username-Credentials') {
             steps {
                 script{
                     varVal =null
@@ -27,6 +40,6 @@ pipeline {
                 echo "Folder-1-Conjur Cred Val  : ${varVal}"
                 }
             }
-        }
+        }*/
     }
 }
