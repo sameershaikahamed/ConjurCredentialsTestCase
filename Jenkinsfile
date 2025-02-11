@@ -22,7 +22,7 @@ pipeline {
                 script{
                     varVal =null
              withCredentials([conjurSecretUsername(credentialsId: 'BITBUCKET-GIT-REPO-Conjur-USERNAME-PWD-ID', passwordVariable: 'CONJUR_SECRET', usernameVariable: 'USERNAME')]) {
-                        varVal = CONJUR_SECRET
+                        varVal = USERNAME
                     }
                 echo "Folder-1-Conjur Cred Val  : ${varVal}"
                 }
