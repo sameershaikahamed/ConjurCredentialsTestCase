@@ -18,11 +18,24 @@ pipeline {
         }
 
         
-            stage('Folder-1-Folder Job-Conur-Secret Username-Credentials') {
+            stage('Jenkins Multi Branch Folder-1-Folder Job-Conur-Secret Username-Credentials') {
             steps {
                 script{
                     varVal =null
               withCredentials([conjurSecretUsername(credentialsId: 'Folder2-Conjur-Username-PWD-ID', passwordVariable: 'CONJUR_SECRET', usernameVariable: 'USERNAME')]) {
+                        varVal = CONJUR_SECRET
+                    }
+                echo "Folder-1-Conjur Cred Val  : ${varVal}"
+                }
+            }
+        }
+
+         stage('Jenkins Folder-1-Folder Job-Conur-Secret Username-Credentials') {
+            steps {
+                script{
+                    varVal =null
+              
+        withCredentials([conjurSecretUsername(credentialsId: 'Intel-Folder-Job-Cred-ID', passwordVariable: 'CONJUR_SECRET', usernameVariable: 'USERNAME')]) {
                         varVal = CONJUR_SECRET
                     }
                 echo "Folder-1-Conjur Cred Val  : ${varVal}"
