@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     stages {
-        stage('BitBucket-Git URL Conjur Secret') {
+        /*stage('BitBucket-Git URL Conjur Secret') {
             steps {
                  script{
                     varVal =null
@@ -15,10 +15,10 @@ pipeline {
                 }
                
             }
-        }
+        }*/
 
         
-            stage('Jenkins Multi Branch Folder-1-Folder Job-Conur-Secret Username-Credentials') {
+            /*stage('Jenkins Multi Branch Folder-1-Folder Job-Conur-Secret Username-Credentials') {
             steps {
                 script{
                     varVal =null
@@ -28,7 +28,7 @@ pipeline {
                 echo "Folder-1-Conjur Cred Val  : ${varVal}"
                 }
             }
-        }
+        }*/
 
          stage('Jenkins Folder-1-Folder Job-Conur-Secret Username-Credentials') {
             steps {
