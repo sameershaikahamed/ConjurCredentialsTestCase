@@ -22,7 +22,7 @@ pipeline {
             steps {
                 script{
                     varVal =null
-              withCredentials([conjurSecretUsername(credentialsId: 'folder-job-intel-test-ID', passwordVariable: 'CONJUR_SECRET', usernameVariable: 'USERNAME')]) {
+              withCredentials([conjurSecretUsername(credentialsId: 'Folder1-Job-Cred-username-ID', passwordVariable: 'CONJUR_SECRET', usernameVariable: 'USERNAME')]) {
                         varVal = CONJUR_SECRET
                     }
                 echo "Folder-1-Conjur Cred Val  : ${varVal}"
