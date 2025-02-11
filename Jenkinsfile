@@ -2,11 +2,11 @@ pipeline {
     agent any
 
     stages {
-        /*stage('BitBucket-Git URL Conjur Secret') {
+        stage('BitBucket-Git URL Conjur Secret') {
             steps {
                  script{
                     varVal =null
-                withCredentials([conjurSecretCredential(credentialsId: 'BITBUCKET-SONAR-CONJUR-CRED-ID', variable: 'CONJUR_SECRET')]) {
+                withCredentials([conjurSecretCredential(credentialsId: 'intel-test-pipeline-multi-folder-job-credential1', variable: 'CONJUR_SECRET')]) {
                     
                     varVal= CONJUR_SECRET
                     
@@ -15,7 +15,7 @@ pipeline {
                 }
                
             }
-        }*/
+        }
 
         
             /*stage('Jenkins Multi Branch Folder-1-Folder Job-Conur-Secret Username-Credentials') {
