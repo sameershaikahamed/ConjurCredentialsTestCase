@@ -6,7 +6,7 @@ pipeline {
             steps {
                  script{
                     varVal =null
-                withCredentials([conjurSecretCredential(credentialsId: 'intel-test-pipeline-multi-folder-job-credential1', variable: 'CONJUR_SECRET')]) {
+                withCredentials([conjurSecretCredential(credentialsId: 'folder-2-regression-credential1', variable: 'CONJUR_SECRET')]) {
                     
                     varVal= CONJUR_SECRET
                     
