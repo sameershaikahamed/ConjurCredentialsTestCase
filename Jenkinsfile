@@ -29,7 +29,7 @@ pipeline {
                 }
             }
         }
-        stage('BitBucket-Git URL Conjur Secret') {
+        /*stage('BitBucket-Git URL Conjur Secret') {
             steps {
                  script{
                     varVal =null
@@ -57,7 +57,7 @@ pipeline {
                 }
                
             }
-        }
+        }*/
       
             stage('Folder-1-Folder Job-Conur-Secret Username-Credentials') {
             steps {
