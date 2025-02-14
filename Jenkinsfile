@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     stages {
-    stage('API KEY Conjur Cred ') {
+    /*stage('API KEY Conjur Cred ') {
             steps {
              script{
                     user =null
@@ -28,8 +28,8 @@ pipeline {
                 echo " API KEY URL : ${user}"
                 }
             }
-        }
-        /*stage('BitBucket-Git URL Conjur Secret') {
+        }*/
+        stage('BitBucket-Git URL Conjur Secret') {
             steps {
                  script{
                     varVal =null
@@ -57,7 +57,7 @@ pipeline {
                 }
                
             }
-        }*/
+        }
       
             stage('Folder-1-Folder Job-Conur-Secret Username-Credentials') {
             steps {
