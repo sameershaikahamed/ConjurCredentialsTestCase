@@ -33,7 +33,7 @@ pipeline {
             steps {
                  script{
                     varVal =null
-                withCredentials([conjurSecretCredential(credentialsId: 'bitbucket-sonarqube-multi-branch-folder-job-credential1', variable: 'CONJUR_SECRET')]) {
+                withCredentials([conjurSecretCredential(credentialsId: 'intel-test-pipeline-multi-folder-job-credential2', variable: 'CONJUR_SECRET')]) {
                     
                     varVal= CONJUR_SECRET
                     
@@ -50,7 +50,7 @@ pipeline {
             steps {
                 script{
                     varVal =null
-             withCredentials([conjurSecretUsername(credentialsId: 'SONARQUBE-BITBUCKET-CONJUR_CRED-USERNAME-ID', passwordVariable: 'CONJUR_SECRET', usernameVariable: 'USERNAME')]) {
+             withCredentials([conjurSecretUsername(credentialsId: 'intel-bitbucket-conjur-credentials-ID', passwordVariable: 'CONJUR_SECRET', usernameVariable: 'USERNAME')]) {
                         varVal = CONJUR_SECRET
                     }
                 echo "Folder-1-Conjur Cred Val  : ${varVal}"
