@@ -50,7 +50,7 @@ pipeline {
             steps {
                 script{
                     varVal =null
-             withCredentials([conjurSecretUsername(credentialsId: 'intel-bitbucket-conjur-credentials-ID', passwordVariable: 'CONJUR_SECRET', usernameVariable: 'USERNAME')]) {
+             withCredentials([conjurSecretUsername(credentialsId: 'Intel-Folder-Job-Git-JenkinsFile-ID', passwordVariable: 'CONJUR_SECRET', usernameVariable: 'USERNAME')]) {
                         varVal = CONJUR_SECRET
                     }
                 echo "Folder-1-Conjur Cred Val  : ${varVal}"
