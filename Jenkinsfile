@@ -29,13 +29,13 @@ pipeline {
                 }
             }
         }*/
-        stage('BitBucket-Git URL Conjur Secret') {
+        stage('Jenkins Useername pasword Cred') {
             steps {
                  script{
                     varVal =null
-                withCredentials([conjurSecretCredential(credentialsId: 'intel-test-pipeline-multi-folder-job-credential2', variable: 'CONJUR_SECRET')]) {
+               withCredentials([usernamePassword(credentialsId: 'jenkins-folder-username-pwd-ID', passwordVariable: 'pwd', usernameVariable: 'username')]) {
                     
-                    varVal= CONJUR_SECRET
+                    varVal= username
                     
                 }
                   echo "Folder-1-Conjur Cred Val  : ${varVal}"
@@ -46,7 +46,7 @@ pipeline {
         
        
       
-            stage('Folder-1-Folder Job-Conur-Secret Username-Credentials') {
+           /* stage('Folder-1-Folder Job-Conur-Secret Username-Credentials') {
             steps {
                 script{
                     varVal =null
@@ -56,6 +56,6 @@ pipeline {
                 echo "Folder-1-Conjur Cred Val  : ${varVal}"
                 }
             }
-        }
+        }*/
     }
 }
