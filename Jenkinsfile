@@ -29,7 +29,7 @@ pipeline {
                 }
             }
         }*/
-        stage('Jenkins Useername pasword Cred') {
+        /*stage('Jenkins Useername pasword Cred') {
             steps {
                  script{
                     varVal =null
@@ -42,7 +42,23 @@ pipeline {
                 }
                
             }
+        }*/
+
+        stage('Jenkins Username Password Cred') {
+    steps {
+        script {
+            def varVal = null
+            withCredentials([usernamePassword(
+                credentialsId: 'non-conjur-folder-username-pwd-ID',
+                usernameVariable: 'JENKINS_USERNAME',
+                passwordVariable: 'JENKINS_PASSWORD'
+            )]) {
+                varVal = env.JENKINS_PASSWORD
+            }
+            echo "Folder-1-Username Password Val: ${varVal}"
         }
+    }
+}
         
        
       
