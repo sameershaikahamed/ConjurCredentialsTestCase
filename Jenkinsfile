@@ -33,12 +33,12 @@ pipeline {
             steps {
                  script{
                     varVal =null
-               withCredentials([usernamePassword(credentialsId: 'jenkins-folder-username-pwd-ID', passwordVariable: 'pwd', usernameVariable: 'username')]) {
+               withCredentials([usernamePassword(credentialsId: 'non-conjur-folder-username-pwd-ID', passwordVariable: 'jenkins-username', usernameVariable: 'jenkins-username-pwd')]) {
                     
-                    varVal= username
+                    varVal= jenkins-username-pwd
                     
                 }
-                  echo "Folder-1-Conjur Cred Val  : ${varVal}"
+                  echo "Folder-1-Username Password Val  : ${varVal}"
                 }
                
             }
