@@ -8,8 +8,8 @@ pipeline {
                     user =null
  
                    /// withCredentials([conjurSecretCredential(credentialsId: 'apikey-username-cred', variable: 'CONJUR_SECRET')]) {
-                 withCredentials([conjurSecretCredential(credentialsId: 'apikey-username', variable: 'CONJUR_SECRET')]) {
-                      user=CONJUR_SECRET
+                 withCredentials([usernamePassword(credentialsId: 'github-username-credential', passwordVariable: 'pwd', usernameVariable: 'useer')]) {
+                      user=useer
                 }
                 echo " API KEY URL : ${user}"
                 }
