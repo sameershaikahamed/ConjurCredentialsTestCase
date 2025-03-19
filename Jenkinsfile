@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     stages {
-    /*stage('API KEY Conjur Cred ') {
+   stage('API KEY Conjur Cred ') {
             steps {
              script{
                     user =null
@@ -16,7 +16,7 @@ pipeline {
             }
         }
         
-           stage('API KEY Conjur Username Cred ') {
+            /*stage('API KEY Conjur Username Cred ') {
             steps {
              script{
                     user =null
